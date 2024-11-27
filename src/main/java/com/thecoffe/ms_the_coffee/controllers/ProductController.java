@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thecoffe.ms_the_coffee.models.Product;
-import com.thecoffe.ms_the_coffee.services.ProductService;
+import com.thecoffe.ms_the_coffee.services.interfaces.ProductService;
 import com.thecoffe.ms_the_coffee.validations.ValidationBindingResult;
 
 import jakarta.validation.Valid;

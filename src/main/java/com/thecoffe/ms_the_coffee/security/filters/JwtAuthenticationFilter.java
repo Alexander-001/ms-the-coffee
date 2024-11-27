@@ -75,11 +75,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .expiration(new Date(System.currentTimeMillis() + 3600000))
                 .issuedAt(new Date())
                 .signWith(SECRET_KEY).compact();
+
         response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
         Map<String, String> body = new HashMap<>();
         body.put("token", token);
         body.put("username", username);
-        body.put("message", String.format("Hola %s has iniciado sesión con exito!", username));
+        body.put("message", "Hola %s has iniciado sesión con exito!".formatted(username));
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
         response.setContentType(CONTENT_TYPE);
         response.setStatus(200);

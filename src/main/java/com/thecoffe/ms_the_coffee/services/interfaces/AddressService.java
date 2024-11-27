@@ -1,4 +1,4 @@
-package com.thecoffe.ms_the_coffee.services;
+package com.thecoffe.ms_the_coffee.services.interfaces;
 
 import java.util.List;
 import java.util.Optional;

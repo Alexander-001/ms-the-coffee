@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thecoffe.ms_the_coffee.models.Address;
-import com.thecoffe.ms_the_coffee.services.AddressService;
+import com.thecoffe.ms_the_coffee.services.interfaces.AddressService;
 import com.thecoffe.ms_the_coffee.validations.ValidationBindingResult;
 
 import jakarta.validation.Valid;
@@ -42,7 +42,7 @@ public class AddressController {
         List<Address> address = placeService.findAll();
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Direcciones encontradas");
-        response.put("address", address);
+        response.put("addresses", address);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

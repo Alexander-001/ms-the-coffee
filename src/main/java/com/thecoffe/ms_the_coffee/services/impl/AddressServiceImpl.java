@@ -1,4 +1,4 @@
-package com.thecoffe.ms_the_coffee.services;
+package com.thecoffe.ms_the_coffee.services.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.thecoffe.ms_the_coffee.models.Address;
 import com.thecoffe.ms_the_coffee.repositories.AddressRepository;
+import com.thecoffe.ms_the_coffee.services.interfaces.AddressService;
 
 @Service
 public class AddressServiceImpl implements AddressService {

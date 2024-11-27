@@ -28,7 +28,7 @@ public class JpaUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws EmailNotFoundException {
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
-            throw new EmailNotFoundException(String.format("Correo: %s no existe en el sistema.", email));
+            throw new EmailNotFoundException("Correo: %s no existe en el sistema.".formatted(email));
         }
         User user = userOptional.orElseThrow();
         List<GrantedAuthority> authorities = user.getRoles().stream()

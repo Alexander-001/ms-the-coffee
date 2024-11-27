@@ -1,4 +1,4 @@
-package com.thecoffe.ms_the_coffee.services;
+package com.thecoffe.ms_the_coffee.services.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.thecoffe.ms_the_coffee.models.Product;
 import com.thecoffe.ms_the_coffee.repositories.ProductRepository;
+import com.thecoffe.ms_the_coffee.services.interfaces.ProductService;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -54,6 +55,7 @@ public class ProductServiceImpl implements ProductService {
             updateProduct.setPrice(product.getPrice());
             updateProduct.setDescription(product.getDescription());
             updateProduct.setSku(product.getSku());
+            updateProduct.setImage(product.getImage());
             return Optional.of(productRepository.save(updateProduct));
         }
         return productDb;

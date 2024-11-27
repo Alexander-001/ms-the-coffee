@@ -5,8 +5,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.thecoffe.ms_the_coffee.validations.ExistsByEmail;
-import com.thecoffe.ms_the_coffee.validations.ExistsByUsername;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,13 +29,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
-    @ExistsByUsername
     @NotBlank(message = "El usuario no puede estar vacio.")
     @Size(min = 4, max = 12, message = "El usuario debe estar entre 4 y 12 caracteres.")
     private String username;
     @Column(unique = true)
     @NotBlank(message = "El correo no puede estar vacio.")
-    @ExistsByEmail
     private String email;
     @NotBlank(message = "La contraseña no puede estar vacia.")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -46,7 +42,7 @@ public class User {
     private boolean enabled;
     @Transient
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Boolean admin;
+    private boolean admin;
     @JsonIgnoreProperties({ "users", "handler", "hibernateLazyInitializer" })
     @ManyToMany
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"), uniqueConstraints = {
@@ -102,7 +98,7 @@ public class User {
         this.enabled = enabled;
     }
 
-    public Boolean isAdmin() {
+    public boolean isAdmin() {
         return admin;
     }
 

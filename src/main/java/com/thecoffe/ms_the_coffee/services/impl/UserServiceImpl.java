@@ -1,4 +1,4 @@
-package com.thecoffe.ms_the_coffee.services;
+package com.thecoffe.ms_the_coffee.services.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ import com.thecoffe.ms_the_coffee.models.User;
 import com.thecoffe.ms_the_coffee.models.UserRole;
 import com.thecoffe.ms_the_coffee.repositories.RoleRepository;
 import com.thecoffe.ms_the_coffee.repositories.UserRepository;
+import com.thecoffe.ms_the_coffee.services.interfaces.UserService;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -46,6 +47,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     // * Save user in databse with role USER or ADMIN

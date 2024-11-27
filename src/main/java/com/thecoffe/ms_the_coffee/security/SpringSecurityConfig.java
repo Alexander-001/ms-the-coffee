@@ -21,19 +21,12 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import com.thecoffe.ms_the_coffee.security.filters.CustomAccessDeniedFilter;
 import com.thecoffe.ms_the_coffee.security.filters.JwtAuthenticationFilter;
 import com.thecoffe.ms_the_coffee.security.filters.JwtValidationFilter;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
 public class SpringSecurityConfig {
-
-    private final CustomAccessDeniedFilter customAccessDeniedFilter;
-
-    public SpringSecurityConfig(CustomAccessDeniedFilter customAccessDeniedFilter) {
-        this.customAccessDeniedFilter = customAccessDeniedFilter;
-    }
 
     @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
@@ -53,14 +46,16 @@ public class SpringSecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+                .requestMatchers(HttpMethod.POST, "/users/confirmation-email").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/users/{id}").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/users/{username}").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/users/role").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/users/{id}").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/users/role-admin").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/users/role-user").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/products", "/products/{id}").hasAnyRole("ADMIN", "USER")
+                .requestMatchers(HttpMethod.GET, "/products", "/products/{id}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/products/{id}").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/products/{id}").hasRole("ADMIN")
@@ -69,7 +64,6 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/address/{id}").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/address/{id}").hasRole("ADMIN")
                 .anyRequest().authenticated())
-                .exceptionHandling(handling -> handling.accessDeniedHandler(customAccessDeniedFilter))
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .addFilter(new JwtValidationFilter(authenticationManager()))
                 .csrf(config -> config.disable())

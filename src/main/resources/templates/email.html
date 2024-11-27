@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Confirmación registro de usuario</title>
+    <style>
+      .btn-link {
+        display: inline-block;
+        background-color: #0062e7;
+        width: 150px;
+        height: 50px;
+        color: #fff !important;
+        text-align: center;
+        line-height: 50px;
+        border-radius: 9999px;
+        text-decoration: none;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .btn-link:hover {
+        background-color: #0051be;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="font-size: 30px">Hola, <span th:text="${name}"></span>!</h1>
+    <p style="font-size: 20px" th:text="${message}"></p>
+    <a href="http://localhost:3000/confirmation-email" class="btn-link">
+      Confirmar
+    </a>
+  </body>
+</html>
