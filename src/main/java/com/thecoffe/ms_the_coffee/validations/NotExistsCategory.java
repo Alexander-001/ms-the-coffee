@@ -8,12 +8,11 @@ import java.lang.annotation.Target;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-@Constraint(validatedBy = ExistsCategoryValidation.class)
+@Constraint(validatedBy = NotExistsCategoryValidation.class)
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ExistsCategory {
-
-    String message() default "La categoría ya existe.";
+public @interface NotExistsCategory {
+    String message() default "La categoría no existe.";
 
     Class<?>[] groups() default {};
 

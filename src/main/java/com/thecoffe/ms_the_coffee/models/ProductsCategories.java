@@ -1,5 +1,7 @@
 package com.thecoffe.ms_the_coffee.models;
 
+import com.thecoffe.ms_the_coffee.validations.ExistsCategory;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +17,7 @@ public class ProductsCategories {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotBlank(message = "El nombre no puede estar vacio.")
+    @ExistsCategory
     private String name;
 
     public Long getId() {

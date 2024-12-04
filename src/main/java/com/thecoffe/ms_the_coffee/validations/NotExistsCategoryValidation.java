@@ -9,7 +9,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 @Component
-public class ExistsCategoryValidation implements ConstraintValidator<ExistsCategory, String> {
+public class NotExistsCategoryValidation implements ConstraintValidator<NotExistsCategory, String> {
 
     @Autowired
     private ProductsCategoriesService productsCategoriesService;
@@ -19,6 +19,7 @@ public class ExistsCategoryValidation implements ConstraintValidator<ExistsCateg
         if (productsCategoriesService == null) {
             return true;
         }
-        return !productsCategoriesService.existsByName(categoryName);
+        return productsCategoriesService.existsByName(categoryName);
     }
+
 }

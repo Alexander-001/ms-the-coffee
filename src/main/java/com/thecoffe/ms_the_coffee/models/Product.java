@@ -1,7 +1,7 @@
 package com.thecoffe.ms_the_coffee.models;
 
-import com.thecoffe.ms_the_coffee.validations.ExistsCategory;
 import com.thecoffe.ms_the_coffee.validations.ExistsProduct;
+import com.thecoffe.ms_the_coffee.validations.NotExistsCategory;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,7 +34,7 @@ public class Product {
     @NotBlank(message = "La imagen en base 64 no puede estar vacia.")
     private String image;
     @NotBlank(message = "La categoria no puede estar vacia")
-    @ExistsCategory
+    @NotExistsCategory
     private String category;
 
     public Long getId() {
