@@ -38,7 +38,7 @@ public class AddressServiceImpl implements AddressService {
         return addressRepository.existsByName(name);
     }
 
-    // * Save a new direction in databse
+    // * Save new direction in database
     @Transactional
     @Override
     public Address save(Address address) {
