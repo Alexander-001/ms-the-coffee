@@ -94,7 +94,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         body.put("message", "Error en la autenticación, usuario o contraseña incorrectos.");
         body.put("error", failed.getMessage());
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
-        response.setStatus(401);
+        response.setStatus(200);
         response.setContentType(CONTENT_TYPE);
     }
 
