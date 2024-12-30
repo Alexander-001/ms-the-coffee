@@ -1,9 +1,12 @@
 package com.thecoffe.ms_the_coffee.controllers;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,7 @@ import com.thecoffe.ms_the_coffee.models.User;
 import com.thecoffe.ms_the_coffee.models.UserRole;
 import com.thecoffe.ms_the_coffee.services.DataStoreService;
 import com.thecoffe.ms_the_coffee.services.EmailService;
+import com.thecoffe.ms_the_coffee.services.interfaces.PasswordResetService;
 import com.thecoffe.ms_the_coffee.services.interfaces.UserService;
 import com.thecoffe.ms_the_coffee.validations.ValidationBindingResult;
 
@@ -37,6 +41,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordResetService passwordResetService;
 
     @Autowired
     private ValidationBindingResult validationBindingResult;
@@ -57,18 +64,54 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    // * Get user by username
-    @GetMapping("/{username}")
-    public ResponseEntity<Map<String, Object>> findUserById(@PathVariable String username) {
-        Optional<User> userDb = userService.findByUsername(username);
+    // * Get all users
+    @PostMapping("/info")
+    public ResponseEntity<Map<String, Object>> findUserByEmail(@Valid @RequestBody UserRole userRole,
+            BindingResult result) {
+        if (result.hasFieldErrors()) {
+            return validationBindingResult.validation(result);
+        }
+        Optional<User> user = userService.findByEmail(userRole.getEmail());
         Map<String, Object> response = new HashMap<>();
-        if (userDb.isPresent()) {
+        if (user.isPresent()) {
             response.put("message", "Usuario encontrado");
-            response.put("user", userDb.orElseThrow());
+            response.put("user", user.orElseThrow());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        response.put("message", "No se encontro usuario");
+        response.put("user", null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, Object>> forgotPassword(@Valid @RequestBody UserRole userRole,
+            BindingResult result) {
+        if (result.hasFieldErrors()) {
+            return validationBindingResult.validation(result);
+        }
+        Optional<User> userOptional = userService.findByEmail(userRole.getEmail());
+        Map<String, Object> response = new HashMap<>();
+        if (userOptional.isPresent()) {
+            User user = userOptional.orElseThrow();
+            String token = UUID.randomUUID().toString();
+            Instant expirationTime = Instant.now().plus(1, ChronoUnit.HOURS);
+            passwordResetService.save(user.getId(), token, expirationTime);
+            String resetUrl = String.format("http://localhost:3000/reset-password?token=%s", token);
+            Model model = new ExtendedModelMap();
+            model.addAttribute("name", user.getFirstName() + " " + user.getLastName());
+            model.addAttribute("message",
+                    "Lamentamos que tengas problemas para iniciar sesión en The Company. Hemos recibido un mensaje conforme has olvidado tu contraseña, si has sido tu puedes cambiar la contraseña ahora.");
+            model.addAttribute("resetUrl", resetUrl);
+            emailService.sendEmail(user.getEmail(), "Recuperación de cuenta",
+                    "forgot-password", model);
+            response.put("message",
+                    "Se ha enviado un correo electronico con un enlace para volver a ingresar tu cuenta.");
+            response.put("user", user);
+            dataStoreService.save("user", user);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
-        response.put("message", "No existe el usuario");
-        response.put("user", new HashMap<>());
+        response.put("user", null);
+        response.put("message", "Usuario no existe.");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -76,90 +119,73 @@ public class UserController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> registerUserAdmin(@Valid @RequestBody User user, BindingResult result) {
         user.setAdmin(true);
-        return validateUserEmail(user, result);
+        return registerNewUser(user, result);
     }
 
     // * Register new user with ROLE_USER
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> registerUser(@Valid @RequestBody User user, BindingResult result) {
         user.setAdmin(false);
-        return validateUserEmail(user, result);
+        return registerNewUser(user, result);
     }
 
     // * Method to register a new user, used in: registerAdmin, registerUser.
-    private ResponseEntity<Map<String, Object>> validateUserEmail(@Valid @RequestBody User user, BindingResult result) {
+    private ResponseEntity<Map<String, Object>> registerNewUser(@Valid @RequestBody User user, BindingResult result) {
         if (result.hasFieldErrors()) {
             return validationBindingResult.validation(result);
         }
         Map<String, Object> response = new HashMap<>();
         boolean emailExists = userService.existsByEmail(user.getEmail());
         if (emailExists) {
-            response.put("message", "Email ya existe");
-            response.put("successRegister", false);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        }
-        boolean usernameExists = userService.existsByUsername(user.getUsername());
-        if (usernameExists) {
-            response.put("message", "Nombre de usuario ya existe");
-            response.put("successRegister", false);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        }
-        // * Send email to confirm user register
-        try {
-            Model model = new ExtendedModelMap();
-            model.addAttribute("name", user.getUsername());
-            model.addAttribute("email", user.getEmail());
-            model.addAttribute("message",
-                    "Hemos recibido una solicitud para una creacion de cuenta en nuestra página, da clic en el siguiente boton para confirmar tu registro.");
-            emailService.sendEmail(user.getEmail(), "Confirmación registro de usuario", "email", model);
-            response.put("message", "Revisa tu correo para confirmación del registro");
-            response.put("successRegister", true);
-            dataStoreService.save("email", user.getEmail());
-            dataStoreService.save("name", user.getUsername());
-            dataStoreService.save("password", user.getPassword());
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("message", "Error al enviar correo");
-            response.put("successRegister", false);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    // * Register user when confirm email
-    @PostMapping("/confirmation-email")
-    public ResponseEntity<Map<String, Object>> create() {
-        Map<String, Object> response = new HashMap<>();
-        String name = (String) dataStoreService.get("name");
-        String email = (String) dataStoreService.get("email");
-        String password = (String) dataStoreService.get("password");
-        if (email == null && name == null && password == null) {
-            response.put("message", "No es posible realizar registro");
+            response.put("message", "El usuario con email: " + user.getEmail() + " ya existe");
             response.put("user", null);
-            deleteDataStorage();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
+        boolean rutExists = userService.existsByRut(user.getRut());
+        if (rutExists) {
+            response.put("message", "El usuario con rut: " + user.getRut() + " ya existe");
+            response.put("user", null);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         }
         User newUser = new User();
-        newUser.setUsername(name);
-        newUser.setEmail(email);
-        newUser.setPassword(password);
+        newUser.setRut(user.getRut());
+        newUser.setEmail(user.getEmail());
+        newUser.setFirstName(user.getFirstName());
+        newUser.setLastName(user.getLastName());
+        newUser.setPhone(user.getPhone());
+        newUser.setGender(user.getGender());
+        newUser.setBirthDate(user.getBirthDate());
+        newUser.setCountry(user.getCountry());
+        newUser.setCity(user.getCity());
+        newUser.setAddress(user.getAddress());
+        newUser.setImage(user.getImage());
+        newUser.setPassword(user.getPassword());
+        newUser.setAdmin(user.isAdmin());
+        newUser.setPosition(user.getPosition());
+        newUser.setTeam(user.getTeam());
         try {
             User savedUser = userService.save(newUser);
+            Model model = new ExtendedModelMap();
+            model.addAttribute("name", user.getFirstName() + " " + user.getLastName());
+            model.addAttribute("message",
+                    "Gracias por unirte a nuestro equipo, hemos creado una contraseña provisional para que puedas iniciar sesión.");
+            model.addAttribute("email", user.getEmail());
+            model.addAttribute("password", user.getPassword());
+            emailService.sendEmail(user.getEmail(), "Bienvenido a the company",
+                    "email", model);
             response.put("message", "Usuario creado correctamente");
             response.put("user", savedUser);
-            deleteDataStorage();
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             e.printStackTrace();
             response.put("message", "Error al crear el usuario");
             response.put("user", null);
-            deleteDataStorage();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
     // * Update user by id
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Map<String, Object>> updateUser(@Valid @RequestBody User user, BindingResult result,
             @PathVariable Long id) {
         if (result.hasFieldErrors()) {
@@ -169,12 +195,20 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
         if (updateUser.isPresent()) {
             user.setId(id);
+            Model model = new ExtendedModelMap();
+            model.addAttribute("name", user.getFirstName() + " " + user.getLastName());
+            model.addAttribute("message",
+                    "Te comentamos que tu usuario ha sido actualizado.");
+            model.addAttribute("email", user.getEmail());
+            model.addAttribute("password", user.getPassword());
+            emailService.sendEmail(user.getEmail(), "Actualización de usuario",
+                    "email", model);
             response.put("message", "Usuario actualizado");
             response.put("user", updateUser.orElseThrow());
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
         response.put("message", "No se pudo actualizar usuario");
-        response.put("user", new HashMap<>());
+        response.put("user", null);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -193,7 +227,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
         response.put("message", "No se pudo agregar role Admin");
-        response.put("user", new HashMap<>());
+        response.put("user", null);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -212,7 +246,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
         response.put("message", "No se pudo eliminar role Admin");
-        response.put("user", new HashMap<>());
+        response.put("user", null);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -228,14 +262,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
         response.put("message", "No se pudo eliminar dirección");
-        response.put("user", new HashMap<>());
+        response.put("user", null);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
-    // * Method to delete user storage
-    private void deleteDataStorage() {
-        dataStoreService.delete("name");
-        dataStoreService.delete("email");
-        dataStoreService.delete("password");
     }
 }

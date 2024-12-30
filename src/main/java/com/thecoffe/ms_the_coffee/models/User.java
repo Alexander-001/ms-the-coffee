@@ -19,7 +19,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
@@ -29,15 +28,39 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
-    @NotBlank(message = "El usuario no puede estar vacio.")
-    @Size(min = 4, max = 12, message = "El usuario debe estar entre 4 y 12 caracteres.")
-    private String username;
+    @NotBlank(message = "El Rut no puede estar vacio.")
+    private String rut;
     @Column(unique = true)
     @NotBlank(message = "El correo no puede estar vacio.")
     private String email;
+    @NotBlank(message = "El nombre no puede estar vacio.")
+    @Column(name = "first_name")
+    private String firstName;
+    @NotBlank(message = "El apellido no puede estar vacio.")
+    @Column(name = "last_name")
+    private String lastName;
+    @NotBlank(message = "El telefono no puede estar vacio.")
+    private String phone;
+    @NotBlank(message = "El genero no puede estar vacio.")
+    private String gender;
+    @NotBlank(message = "La fecha de nacimiento no puede estar vacia.")
+    @Column(name = "birth_date")
+    private String birthDate;
+    @NotBlank(message = "El país no puede estar vacio.")
+    private String country;
+    @NotBlank(message = "La ciudad no puede estar vacia.")
+    private String city;
+    @NotBlank(message = "La dirección no puede estar vacia.")
+    private String address;
     @NotBlank(message = "La contraseña no puede estar vacia.")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+    @NotBlank(message = "La posición/cargo no puede estar vacia.")
+    private String position;
+    @NotBlank(message = "La posición/cargo no puede estar vacia.")
+    private String team;
+    @NotBlank(message = "La imagen no puede estar vacia.")
+    private String image;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private boolean enabled;
     @Transient
@@ -66,12 +89,12 @@ public class User {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getRut() {
+        return rut;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setRut(String rut) {
+        this.rut = rut;
     }
 
     public String getEmail() {
@@ -82,12 +105,100 @@ public class User {
         this.email = email;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(String birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getTeam() {
+        return team;
+    }
+
+    public void setTeam(String team) {
+        this.team = team;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public boolean isEnabled() {
@@ -102,7 +213,7 @@ public class User {
         return admin;
     }
 
-    public void setAdmin(Boolean admin) {
+    public void setAdmin(boolean admin) {
         this.admin = admin;
     }
 
@@ -119,7 +230,7 @@ public class User {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        result = prime * result + ((rut == null) ? 0 : rut.hashCode());
         return result;
     }
 
@@ -137,10 +248,10 @@ public class User {
                 return false;
         } else if (!id.equals(other.id))
             return false;
-        if (username == null) {
-            if (other.username != null)
+        if (rut == null) {
+            if (other.rut != null)
                 return false;
-        } else if (!username.equals(other.username))
+        } else if (!rut.equals(other.rut))
             return false;
         return true;
     }

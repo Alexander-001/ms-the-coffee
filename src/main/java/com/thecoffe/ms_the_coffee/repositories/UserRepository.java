@@ -7,11 +7,11 @@ import org.springframework.data.repository.CrudRepository;
 import com.thecoffe.ms_the_coffee.models.User;
 
 public interface UserRepository extends CrudRepository<User, Long> {
-    boolean existsByUsername(String username);
-
     boolean existsByEmail(String email);
 
-    Optional<User> findByUsername(String username);
+    boolean existsByRut(String rut);
 
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByRut(String rut);
 }

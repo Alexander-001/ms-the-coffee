@@ -45,13 +45,8 @@ public class UserServiceImpl implements UserService {
     // * Get user by id
     @Transactional(readOnly = true)
     @Override
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
-    }
-
-    @Override
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     // * Save user in databse with role USER or ADMIN
@@ -70,18 +65,17 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    // * Validate if username exists
-    @Transactional
-    @Override
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
-    }
-
     // * Validate if exists email
     @Transactional
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    // * Validate if exists rut
+    @Override
+    public boolean existsByRut(String rut) {
+        return userRepository.existsByRut(rut);
     }
 
     // * Get user by id and update with new data
@@ -91,9 +85,20 @@ public class UserServiceImpl implements UserService {
         Optional<User> userDb = userRepository.findById(id);
         if (userDb.isPresent()) {
             User updateUser = userDb.get();
-            updateUser.setUsername(user.getUsername());
+            updateUser.setRut(user.getRut());
             updateUser.setEmail(user.getEmail());
+            updateUser.setFirstName(user.getFirstName());
+            updateUser.setLastName(user.getLastName());
+            updateUser.setPhone(user.getPhone());
+            updateUser.setGender(user.getGender());
+            updateUser.setBirthDate(user.getBirthDate());
+            updateUser.setCountry(user.getCountry());
+            updateUser.setCity(user.getCity());
+            updateUser.setAddress(user.getAddress());
             updateUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            updateUser.setPosition(user.getPosition());
+            updateUser.setTeam(user.getTeam());
+            updateUser.setImage(user.getImage());
             return Optional.of(userRepository.save(updateUser));
         }
         return userDb;
@@ -103,7 +108,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public Optional<User> updateRoleAdmin(UserRole userRole) {
-        Optional<User> userDb = userRepository.findByUsername(userRole.getUsername());
+        Optional<User> userDb = userRepository.findByEmail(userRole.getEmail());
         User user = userDb.get();
         List<Role> roles = user.getRoles();
         List<String> roleName = roles.stream().map(Role::getName).collect(Collectors.toList());
@@ -128,7 +133,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public Optional<User> updateRoleUser(UserRole userRole) {
-        Optional<User> userDb = userRepository.findByUsername(userRole.getUsername());
+        Optional<User> userDb = userRepository.findByEmail(userRole.getEmail());
         User user = userDb.get();
         List<Role> roles = user.getRoles();
         List<String> roleName = roles.stream().map(Role::getName).collect(Collectors.toList());
@@ -149,7 +154,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> delete(Long id) {
         Optional<User> userDb = userRepository.findById(id);
-        userDb.ifPresent((user) -> {
+        userDb.ifPresent(user -> {
+            roleRepository.deleteById(id);
             userRepository.delete(user);
         });
         return userDb;

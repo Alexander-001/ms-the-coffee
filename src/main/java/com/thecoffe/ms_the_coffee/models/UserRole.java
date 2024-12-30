@@ -4,18 +4,18 @@ import jakarta.validation.constraints.NotBlank;
 
 public class UserRole {
 
-    @NotBlank(message = "Nombre de usuario no puede estar vacio.")
-    private String username;
+    @NotBlank(message = "Email no puede estar vacio.")
+    private String email;
 
     public UserRole() {
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }
