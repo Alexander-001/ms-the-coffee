@@ -19,6 +19,8 @@ public class ProductsCategories {
     @NotBlank(message = "El nombre no puede estar vacio.")
     @ExistsCategory
     private String name;
+    @NotBlank(message = "La descripcion no puede estar vacia.")
+    private String description;
 
     public Long getId() {
         return id;
@@ -34,6 +36,14 @@ public class ProductsCategories {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

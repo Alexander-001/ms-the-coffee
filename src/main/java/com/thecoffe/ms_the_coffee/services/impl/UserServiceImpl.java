@@ -3,7 +3,6 @@ package com.thecoffe.ms_the_coffee.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -111,7 +110,8 @@ public class UserServiceImpl implements UserService {
         Optional<User> userDb = userRepository.findByEmail(userRole.getEmail());
         User user = userDb.get();
         List<Role> roles = user.getRoles();
-        List<String> roleName = roles.stream().map(Role::getName).collect(Collectors.toList());
+        List<String> roleName = roles.stream().map(Role::getName).toList();
+        System.out.println(roleName);
         if (!roleName.contains("ROLE_ADMIN")) {
             Optional<Role> optionalRole = roleRepository.findByName("ROLE_ADMIN");
             Role adminRole;
@@ -135,8 +135,9 @@ public class UserServiceImpl implements UserService {
     public Optional<User> updateRoleUser(UserRole userRole) {
         Optional<User> userDb = userRepository.findByEmail(userRole.getEmail());
         User user = userDb.get();
+        System.out.println(user);
         List<Role> roles = user.getRoles();
-        List<String> roleName = roles.stream().map(Role::getName).collect(Collectors.toList());
+        List<String> roleName = roles.stream().map(Role::getName).toList();
         if (roleName.contains("ROLE_ADMIN")) {
             Optional<Role> optionalRole = roleRepository.findByName("ROLE_ADMIN");
             if (optionalRole.isPresent()) {

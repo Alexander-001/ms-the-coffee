@@ -36,6 +36,8 @@ public class Product {
     @NotBlank(message = "La categoria no puede estar vacia")
     @NotExistsCategory
     private String category;
+    @NotNull(message = "El stock no puede estar vacio.")
+    private Integer stock;
 
     public Long getId() {
         return id;
@@ -91,6 +93,14 @@ public class Product {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 
 }

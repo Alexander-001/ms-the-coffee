@@ -65,6 +65,7 @@ public class PasswordResetController {
         }
         if (tokenOptional.isPresent()) {
             PasswordReset passwordReset = tokenOptional.get();
+            System.out.println(passwordReset.getExpirationTime().isAfter(Instant.now()));
             if (passwordReset.getExpirationTime().isAfter(Instant.now())) {
                 response.put("isValid", true);
                 response.put("message", "Token válido. Puedes cambiar tu contraseña.");
@@ -75,7 +76,7 @@ public class PasswordResetController {
         }
         response.put("isValid", false);
         response.put("message", "Token inválido o expirado.");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/update")
@@ -98,7 +99,7 @@ public class PasswordResetController {
         }
         response.put("user", null);
         response.put("message", "Token inválido o expirado.");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
 
     }
 

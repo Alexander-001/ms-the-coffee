@@ -53,6 +53,7 @@ public class ProductsCategoriesServiceImpl implements ProductsCategoriesService 
         if (prodCategoryDb.isPresent()) {
             ProductsCategories updateCategory = prodCategoryDb.get();
             updateCategory.setName(productsCategories.getName());
+            updateCategory.setDescription(productsCategories.getDescription());
             return Optional.of(productsCategoriesRepository.save(updateCategory));
         }
         return prodCategoryDb;

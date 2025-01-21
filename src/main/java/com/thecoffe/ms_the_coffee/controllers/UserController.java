@@ -96,7 +96,7 @@ public class UserController {
             String token = UUID.randomUUID().toString();
             Instant expirationTime = Instant.now().plus(1, ChronoUnit.HOURS);
             passwordResetService.save(user.getId(), token, expirationTime);
-            String resetUrl = String.format("http://localhost:3000/reset-password?token=%s", token);
+            String resetUrl = String.format("http://localhost:3000/login/reset-password?token=%s", token);
             Model model = new ExtendedModelMap();
             model.addAttribute("name", user.getFirstName() + " " + user.getLastName());
             model.addAttribute("message",
@@ -177,6 +177,7 @@ public class UserController {
             response.put("user", savedUser);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
             response.put("message", "Error al crear el usuario");
             response.put("user", null);
