@@ -25,4 +25,6 @@ public interface UserService {
     boolean existsByEmail(String email);
 
     boolean existsByRut(String rut);
+
+    boolean validatePasswords(String currentPassword, String newPassword);
 }

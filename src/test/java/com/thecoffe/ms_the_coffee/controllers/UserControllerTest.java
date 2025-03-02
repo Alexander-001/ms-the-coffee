@@ -1,13 +1,20 @@
 package com.thecoffe.ms_the_coffee.controllers;
 
-import com.thecoffe.ms_the_coffee.models.PasswordReset;
-import com.thecoffe.ms_the_coffee.models.User;
-import com.thecoffe.ms_the_coffee.models.UserRole;
-import com.thecoffe.ms_the_coffee.services.DataStoreService;
-import com.thecoffe.ms_the_coffee.services.EmailService;
-import com.thecoffe.ms_the_coffee.services.impl.UserServiceImpl;
-import com.thecoffe.ms_the_coffee.services.interfaces.PasswordResetService;
-import com.thecoffe.ms_the_coffee.validations.ValidationBindingResult;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -19,12 +26,14 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.thecoffe.ms_the_coffee.models.PasswordEmailReset;
+import com.thecoffe.ms_the_coffee.models.User;
+import com.thecoffe.ms_the_coffee.models.UserRole;
+import com.thecoffe.ms_the_coffee.services.DataStoreService;
+import com.thecoffe.ms_the_coffee.services.EmailService;
+import com.thecoffe.ms_the_coffee.services.impl.UserServiceImpl;
+import com.thecoffe.ms_the_coffee.services.interfaces.PasswordEmailResetService;
+import com.thecoffe.ms_the_coffee.validations.ValidationBindingResult;
 
 class UserControllerTest {
 
@@ -32,7 +41,7 @@ class UserControllerTest {
     private UserServiceImpl userService;
 
     @Mock
-    private PasswordResetService passwordResetService;
+    private PasswordEmailResetService passwordResetService;
 
     @Mock
     private EmailService emailService;
@@ -53,7 +62,7 @@ class UserControllerTest {
 
     private UserRole userRole;
 
-    private PasswordReset passwordReset;
+    private PasswordEmailReset passwordReset;
 
     @BeforeEach
     void setUp() {
@@ -81,7 +90,7 @@ class UserControllerTest {
 
         validationBindingResult = new ValidationBindingResult();
 
-        passwordReset = new PasswordReset();
+        passwordReset = new PasswordEmailReset();
         passwordReset.setId(1L);
         passwordReset.setToken("token1");
         passwordReset.setUserId(1L);
@@ -105,7 +114,8 @@ class UserControllerTest {
     @Test
     void findUserByEmailUserFound() {
         when(userService.findByEmail(userRole.getEmail())).thenReturn(Optional.of(user));
-        ResponseEntity<Map<String, Object>> response = userController.findUserByEmail(userRole, mock(BindingResult.class));
+        ResponseEntity<Map<String, Object>> response = userController.findUserByEmail(userRole,
+                mock(BindingResult.class));
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         Map<String, Object> responseBody = response.getBody();
         assertEquals("Usuario encontrado", responseBody.get("message"));
@@ -115,7 +125,8 @@ class UserControllerTest {
     @Test
     void findUserByEmailUserNotFound() {
         when(userService.findByEmail(userRole.getEmail())).thenReturn(Optional.empty());
-        ResponseEntity<Map<String, Object>> response = userController.findUserByEmail(userRole, mock(BindingResult.class));
+        ResponseEntity<Map<String, Object>> response = userController.findUserByEmail(userRole,
+                mock(BindingResult.class));
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         Map<String, Object> responseBody = response.getBody();
         assertEquals("No se encontro usuario", responseBody.get("message"));
@@ -131,7 +142,8 @@ class UserControllerTest {
     @Test
     void forgotPasswordUserNotFound() {
         when(userService.findByEmail(userRole.getEmail())).thenReturn(Optional.empty());
-        ResponseEntity<Map<String, Object>> response = userController.forgotPassword(userRole, mock(BindingResult.class));
+        ResponseEntity<Map<String, Object>> response = userController.forgotPassword(userRole,
+                mock(BindingResult.class));
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
@@ -139,10 +151,13 @@ class UserControllerTest {
     void forgotPasswordUserFound() {
         Model model = new ExtendedModelMap();
         when(userService.findByEmail(userRole.getEmail())).thenReturn(Optional.of(user));
-        when(passwordResetService.save(1L, UUID.randomUUID().toString(), Instant.now().plus(1, ChronoUnit.HOURS))).thenReturn(passwordReset);
-        doNothing().when(emailService).sendEmail("email@correo.com", "Recuperación de cuenta", "forgot-password", model);
+        when(passwordResetService.save(1L, UUID.randomUUID().toString(), Instant.now().plus(1, ChronoUnit.HOURS)))
+                .thenReturn(passwordReset);
+        doNothing().when(emailService).sendEmail("email@correo.com", "Recuperación de cuenta", "forgot-password",
+                model);
         doNothing().when(dataStoreService).save("user", user);
-        ResponseEntity<Map<String, Object>> response = userController.forgotPassword(userRole, mock(BindingResult.class));
+        ResponseEntity<Map<String, Object>> response = userController.forgotPassword(userRole,
+                mock(BindingResult.class));
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -181,7 +196,8 @@ class UserControllerTest {
         when(userService.existsByEmail(user.getEmail())).thenReturn(false);
         when(userService.existsByRut(user.getRut())).thenReturn(false);
         when(userService.save(user)).thenReturn(user);
-        doNothing().when(emailService).sendEmail("email@correo.com", "Recuperación de cuenta", "forgot-password", model);
+        doNothing().when(emailService).sendEmail("email@correo.com", "Recuperación de cuenta", "forgot-password",
+                model);
         ResponseEntity<Map<String, Object>> response = userController.registerUserAdmin(user, bindingResult);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -195,7 +211,6 @@ class UserControllerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 
-
     @Test
     void updateUserErrors() {
         isErrorFields();
@@ -207,7 +222,8 @@ class UserControllerTest {
     void updateUser() {
         Model model = new ExtendedModelMap();
         when(userService.update(1L, user)).thenReturn(Optional.of(user));
-        doNothing().when(emailService).sendEmail("email@correo.com", "Recuperación de cuenta", "forgot-password", model);
+        doNothing().when(emailService).sendEmail("email@correo.com", "Recuperación de cuenta", "forgot-password",
+                model);
         ResponseEntity<Map<String, Object>> response = userController.updateUser(user, bindingResult, 1L);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -225,6 +241,7 @@ class UserControllerTest {
         ResponseEntity<Map<String, Object>> response = userController.addAdminRole(userRole, bindingResult);
         assertNull(response);
     }
+
     @Test
     void notAddAdminRole() {
         when(userService.updateRoleAdmin(userRole)).thenReturn(Optional.empty());

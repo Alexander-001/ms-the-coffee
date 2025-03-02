@@ -8,14 +8,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.thecoffe.ms_the_coffee.models.PasswordReset;
+import com.thecoffe.ms_the_coffee.models.PasswordEmailReset;
 
-public interface PasswordResetRepository extends CrudRepository<PasswordReset, Long> {
+public interface PasswordEmailResetRepository extends CrudRepository<PasswordEmailReset, Long> {
 
-    Optional<PasswordReset> findByToken(String token);
+    Optional<PasswordEmailReset> findByToken(String token);
 
     @Modifying
-    @Query("DELETE FROM PasswordReset p WHERE p.expirationTime < :currentTime")
+    @Query("DELETE FROM PasswordEmailReset p WHERE p.expirationTime < :currentTime")
     void deleteExpiredTokens(@Param("currentTime") Instant currentTime);
 
 }

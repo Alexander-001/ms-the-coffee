@@ -1,12 +1,14 @@
 package com.thecoffe.ms_the_coffee.controllers;
 
-import com.thecoffe.ms_the_coffee.models.Password;
-import com.thecoffe.ms_the_coffee.models.PasswordReset;
-import com.thecoffe.ms_the_coffee.models.User;
-import com.thecoffe.ms_the_coffee.services.DataStoreService;
-import com.thecoffe.ms_the_coffee.services.interfaces.PasswordResetService;
-import com.thecoffe.ms_the_coffee.services.interfaces.UserService;
-import com.thecoffe.ms_the_coffee.validations.ValidationBindingResult;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,18 +18,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
-import java.time.Instant;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import com.thecoffe.ms_the_coffee.models.Password;
+import com.thecoffe.ms_the_coffee.models.PasswordEmailReset;
+import com.thecoffe.ms_the_coffee.models.User;
+import com.thecoffe.ms_the_coffee.services.DataStoreService;
+import com.thecoffe.ms_the_coffee.services.interfaces.PasswordEmailResetService;
+import com.thecoffe.ms_the_coffee.services.interfaces.UserService;
+import com.thecoffe.ms_the_coffee.validations.ValidationBindingResult;
 
 class PasswordResetControllerTest {
 
     @Mock
-    private PasswordResetService passwordResetService;
+    private PasswordEmailResetService passwordResetService;
 
     @Mock
     private DataStoreService dataStoreService;
@@ -42,9 +44,9 @@ class PasswordResetControllerTest {
     private BindingResult bindingResult;
 
     @InjectMocks
-    private PasswordResetController passwordResetController;
+    private PasswordEmailResetController passwordResetController;
 
-    private PasswordReset passwordReset;
+    private PasswordEmailReset passwordReset;
 
     private Password password;
 
@@ -53,7 +55,7 @@ class PasswordResetControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        passwordReset = new PasswordReset();
+        passwordReset = new PasswordEmailReset();
         passwordReset.setId(1L);
         passwordReset.setToken("token");
         passwordReset.setUserId(2L);
@@ -89,15 +91,18 @@ class PasswordResetControllerTest {
     @Test
     void resetPasswordValidTokenAndEmpty() {
         when(passwordResetService.findByToken("token")).thenReturn(Optional.empty());
-        ResponseEntity<Map<String, Object>> response = passwordResetController.resetPassword("7fd48326-4613-4c4a-9ff9-1f2fa981ed6a");
+        ResponseEntity<Map<String, Object>> response = passwordResetController
+                .resetPassword("7fd48326-4613-4c4a-9ff9-1f2fa981ed6a");
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
     void resetPasswordValidToken() {
-        when(passwordResetService.findByToken("7fd48326-4613-4c4a-9ff9-1f2fa981ed6a")).thenReturn(Optional.of(passwordReset));
+        when(passwordResetService.findByToken("7fd48326-4613-4c4a-9ff9-1f2fa981ed6a"))
+                .thenReturn(Optional.of(passwordReset));
         doNothing().when(dataStoreService).save("token", true);
-        ResponseEntity<Map<String, Object>> response = passwordResetController.resetPassword("7fd48326-4613-4c4a-9ff9-1f2fa981ed6a");
+        ResponseEntity<Map<String, Object>> response = passwordResetController
+                .resetPassword("7fd48326-4613-4c4a-9ff9-1f2fa981ed6a");
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 

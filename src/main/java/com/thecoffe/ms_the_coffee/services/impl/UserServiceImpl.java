@@ -162,4 +162,10 @@ public class UserServiceImpl implements UserService {
         return userDb;
     }
 
+    @Transactional
+    @Override
+    public boolean validatePasswords(String currentPassword, String newPassword) {
+        return passwordEncoder.matches(newPassword, currentPassword);
+    }
+
 }

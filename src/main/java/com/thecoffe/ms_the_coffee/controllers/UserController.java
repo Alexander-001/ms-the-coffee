@@ -28,7 +28,7 @@ import com.thecoffe.ms_the_coffee.models.User;
 import com.thecoffe.ms_the_coffee.models.UserRole;
 import com.thecoffe.ms_the_coffee.services.DataStoreService;
 import com.thecoffe.ms_the_coffee.services.EmailService;
-import com.thecoffe.ms_the_coffee.services.interfaces.PasswordResetService;
+import com.thecoffe.ms_the_coffee.services.interfaces.PasswordEmailResetService;
 import com.thecoffe.ms_the_coffee.services.interfaces.UserService;
 import com.thecoffe.ms_the_coffee.validations.ValidationBindingResult;
 
@@ -43,7 +43,7 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private PasswordResetService passwordResetService;
+    private PasswordEmailResetService passwordEmailResetService;
 
     @Autowired
     private ValidationBindingResult validationBindingResult;
@@ -95,7 +95,7 @@ public class UserController {
             User user = userOptional.orElseThrow();
             String token = UUID.randomUUID().toString();
             Instant expirationTime = Instant.now().plus(1, ChronoUnit.HOURS);
-            passwordResetService.save(user.getId(), token, expirationTime);
+            passwordEmailResetService.save(user.getId(), token, expirationTime);
             String resetUrl = String.format("http://localhost:3000/login/reset-password?token=%s", token);
             Model model = new ExtendedModelMap();
             model.addAttribute("name", user.getFirstName() + " " + user.getLastName());
@@ -114,6 +114,12 @@ public class UserController {
         response.put("message", "Usuario no existe.");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
+    /*
+     * public ResponseEntity<Map<String, Object>> updatePassword(@Valid @RequestBody
+     * PasswordReset passwordReset){
+     * 
+     * }
+     */
 
     // * Register new user with ROLE_ADMIN
     @PostMapping

@@ -1,35 +1,37 @@
 package com.thecoffe.ms_the_coffee.services.impl;
 
-import com.thecoffe.ms_the_coffee.models.PasswordReset;
-import com.thecoffe.ms_the_coffee.repositories.PasswordResetRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import com.thecoffe.ms_the_coffee.models.PasswordEmailReset;
+import com.thecoffe.ms_the_coffee.repositories.PasswordEmailResetRepository;
 
 class PasswordResetServiceImplTest {
 
     @Mock
-    private PasswordResetRepository passwordResetRepository;
+    private PasswordEmailResetRepository passwordResetRepository;
 
     @InjectMocks
-    private PasswordResetServiceImpl passwordResetService;
+    private PasswordEmailResetServiceImpl passwordResetService;
 
-    private PasswordReset passwordReset;
+    private PasswordEmailReset passwordReset;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        passwordReset = new PasswordReset();
+        passwordReset = new PasswordEmailReset();
         passwordReset.setId(1L);
         passwordReset.setToken("token");
         passwordReset.setUserId(1L);
@@ -51,7 +53,8 @@ class PasswordResetServiceImplTest {
     @Test
     void save() {
         when(passwordResetRepository.save(passwordReset)).thenReturn(passwordReset);
-        PasswordReset result = passwordResetService.save(passwordReset.getUserId(), passwordReset.getToken(), passwordReset.getExpirationTime());
+        PasswordEmailReset result = passwordResetService.save(passwordReset.getUserId(), passwordReset.getToken(),
+                passwordReset.getExpirationTime());
         assertNull(result);
     }
 

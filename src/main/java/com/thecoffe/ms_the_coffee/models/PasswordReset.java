@@ -1,59 +1,38 @@
 package com.thecoffe.ms_the_coffee.models;
 
-import java.time.Instant;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
-@Entity
-@Table(name = "password_reset")
 public class PasswordReset {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @NotBlank(message = "El token es obligatorio")
-    private String token;
-    @NotNull(message = "El usuario es obligatorio")
-    private Long userId;
-    @NotNull(message = "La fecha de expiración es obligatoria")
-    private Instant expirationTime;
+    @NotBlank(message = "La contraseña actual es requerida.")
+    private String currentPassword;
+    @NotBlank(message = "La nueva contraseña es requerida.")
+    private String newPassword;
+    @NotBlank(message = "El email es requerido.")
+    private String email;
 
-    public Long getId() {
-        return id;
+    public String getCurrentPassword() {
+        return currentPassword;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCurrentPassword(String currentPassword) {
+        this.currentPassword = currentPassword;
     }
 
-    public String getToken() {
-        return token;
+    public String getNewPassword() {
+        return newPassword;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Instant getExpirationTime() {
-        return expirationTime;
-    }
-
-    public void setExpirationTime(Instant expirationTime) {
-        this.expirationTime = expirationTime;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }

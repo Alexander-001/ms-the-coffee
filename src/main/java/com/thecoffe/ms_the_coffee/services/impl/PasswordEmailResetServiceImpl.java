@@ -8,29 +8,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.thecoffe.ms_the_coffee.models.PasswordReset;
-import com.thecoffe.ms_the_coffee.repositories.PasswordResetRepository;
-import com.thecoffe.ms_the_coffee.services.interfaces.PasswordResetService;
+import com.thecoffe.ms_the_coffee.models.PasswordEmailReset;
+import com.thecoffe.ms_the_coffee.repositories.PasswordEmailResetRepository;
+import com.thecoffe.ms_the_coffee.services.interfaces.PasswordEmailResetService;
 
 @Service
-public class PasswordResetServiceImpl implements PasswordResetService {
+public class PasswordEmailResetServiceImpl implements PasswordEmailResetService {
 
     @Autowired
-    private PasswordResetRepository passwordResetRepository;
+    private PasswordEmailResetRepository passwordResetRepository;
 
     @Override
-    public List<PasswordReset> findAll() {
-        return (List<PasswordReset>) passwordResetRepository.findAll();
+    public List<PasswordEmailReset> findAll() {
+        return (List<PasswordEmailReset>) passwordResetRepository.findAll();
     }
 
     @Override
-    public Optional<PasswordReset> findByToken(String token) {
+    public Optional<PasswordEmailReset> findByToken(String token) {
         return passwordResetRepository.findByToken(token);
     }
 
     @Override
-    public PasswordReset save(Long userId, String token, Instant expirationTime) {
-        PasswordReset passwordResetToken = new PasswordReset();
+    public PasswordEmailReset save(Long userId, String token, Instant expirationTime) {
+        PasswordEmailReset passwordResetToken = new PasswordEmailReset();
         passwordResetToken.setUserId(userId);
         passwordResetToken.setToken(token);
         passwordResetToken.setExpirationTime(expirationTime);
@@ -38,18 +38,18 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     }
 
     @Override
-    public Optional<PasswordReset> update(Long id, PasswordReset passwordReset) {
-        Optional<PasswordReset> passwordResetDb = passwordResetRepository.findById(id);
+    public Optional<PasswordEmailReset> update(Long id, PasswordEmailReset passwordReset) {
+        Optional<PasswordEmailReset> passwordResetDb = passwordResetRepository.findById(id);
         if (passwordResetDb.isPresent()) {
-            PasswordReset updatePasswordReset = passwordResetDb.get();
+            PasswordEmailReset updatePasswordReset = passwordResetDb.get();
             return Optional.of(passwordResetRepository.save(updatePasswordReset));
         }
         return passwordResetDb;
     }
 
     @Override
-    public Optional<PasswordReset> delete(Long id) {
-        Optional<PasswordReset> passwordReset = passwordResetRepository.findById(id);
+    public Optional<PasswordEmailReset> delete(Long id) {
+        Optional<PasswordEmailReset> passwordReset = passwordResetRepository.findById(id);
         passwordReset.ifPresent(password -> {
             passwordResetRepository.delete(password);
         });

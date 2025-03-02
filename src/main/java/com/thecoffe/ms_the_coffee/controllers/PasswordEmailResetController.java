@@ -19,10 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thecoffe.ms_the_coffee.models.Password;
+import com.thecoffe.ms_the_coffee.models.PasswordEmailReset;
 import com.thecoffe.ms_the_coffee.models.PasswordReset;
 import com.thecoffe.ms_the_coffee.models.User;
 import com.thecoffe.ms_the_coffee.services.DataStoreService;
-import com.thecoffe.ms_the_coffee.services.interfaces.PasswordResetService;
+import com.thecoffe.ms_the_coffee.services.interfaces.PasswordEmailResetService;
 import com.thecoffe.ms_the_coffee.services.interfaces.UserService;
 import com.thecoffe.ms_the_coffee.validations.ValidationBindingResult;
 
@@ -31,13 +32,13 @@ import jakarta.validation.Valid;
 @RestController
 @CrossOrigin(originPatterns = "*")
 @RequestMapping("/password")
-public class PasswordResetController {
+public class PasswordEmailResetController {
 
     @Autowired
     ValidationBindingResult validationBindingResult;
 
     @Autowired
-    PasswordResetService passwordResetService;
+    PasswordEmailResetService passwordResetService;
 
     @Autowired
     UserService userService;
@@ -54,9 +55,32 @@ public class PasswordResetController {
         }
     }
 
-    @GetMapping("/reset")
+    @PostMapping("/reset-user-password")
+    public ResponseEntity<Map<String, Object>> resetUserPassword(@Valid @RequestBody PasswordReset passwordReset,
+            BindingResult result) {
+        Map<String, Object> response = new HashMap<>();
+        if (result.hasFieldErrors()) {
+            return validationBindingResult.validation(result);
+        }
+        Optional<User> userOptional = userService.findByEmail(passwordReset.getEmail());
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (userService.validatePasswords(user.getPassword(), passwordReset.getCurrentPassword())) {
+                user.setPassword(passwordReset.getNewPassword());
+                userService.update(user.getId(), user);
+                response.put("message", "Contraseña actualizada.");
+                return ResponseEntity.status(HttpStatus.OK).body(response);
+            }
+            response.put("message", "La contraseña actual es incorrecta.");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
+        response.put("message", "El email no existe.");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/reset-email")
     public ResponseEntity<Map<String, Object>> resetPassword(@RequestParam String token) {
-        Optional<PasswordReset> tokenOptional = passwordResetService.findByToken(token);
+        Optional<PasswordEmailReset> tokenOptional = passwordResetService.findByToken(token);
         Map<String, Object> response = new HashMap<>();
         if (!isValidUUID(token)) {
             response.put("isValid", false);
@@ -64,8 +88,7 @@ public class PasswordResetController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
         if (tokenOptional.isPresent()) {
-            PasswordReset passwordReset = tokenOptional.get();
-            System.out.println(passwordReset.getExpirationTime().isAfter(Instant.now()));
+            PasswordEmailReset passwordReset = tokenOptional.get();
             if (passwordReset.getExpirationTime().isAfter(Instant.now())) {
                 response.put("isValid", true);
                 response.put("message", "Token válido. Puedes cambiar tu contraseña.");
